@@ -116,7 +116,7 @@ module bp_lce_cmd
     // Cmd_o: ready->valid
     , output logic [lce_cmd_msg_width_lp-1:0]        lce_cmd_o
     , output logic                                   lce_cmd_v_o
-    , input                                          lce_cmd_ready_i
+    , input                                          lce_cmd_yumi_i
   );
 
   `declare_bp_bedrock_lce_if(paddr_width_p, cce_block_width_p, lce_id_width_p, cce_id_width_p, lce_assoc_p, lce);
@@ -606,14 +606,14 @@ module bp_lce_cmd
         // handshakes
         // outbound command is ready->valid
         // inbound is valid->yumi, but only dequeue when outbound sends
-        lce_cmd_v_o = lce_cmd_ready_i & lce_cmd_v_i & data_buf_v_r;
+        lce_cmd_v_o = lce_cmd_v_i & data_buf_v_r;
 
         // dequeue the command if transfer is last action
-        lce_cmd_yumi_o = lce_cmd_v_o & (lce_cmd.header.msg_type.cmd != e_bedrock_cmd_st_tr_wb);
+        lce_cmd_yumi_o = lce_cmd_yumi_i & (lce_cmd.header.msg_type.cmd != e_bedrock_cmd_st_tr_wb);
 
         // do a writeback if needed, otherwise go to ready after the transfer sends
         // move to next state when LCE command sends
-        state_n = lce_cmd_v_o
+        state_n = lce_cmd_yumi_i
           ? (lce_cmd.header.msg_type.cmd == e_bedrock_cmd_st_tr_wb)
             ? e_wb_stat_rd
             : e_ready

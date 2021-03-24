@@ -105,7 +105,7 @@ module bp_lce
     // Cmd_o: ready->valid
     , output logic [lce_cmd_msg_width_lp-1:0]        lce_cmd_o
     , output logic                                   lce_cmd_v_o
-    , input                                          lce_cmd_ready_i
+    , input                                          lce_cmd_yumi_i
   );
 
   //synopsys translate_off
@@ -214,7 +214,7 @@ module bp_lce
 
       ,.lce_cmd_o(lce_cmd_o)
       ,.lce_cmd_v_o(lce_cmd_v_o)
-      ,.lce_cmd_ready_i(lce_cmd_ready_i)
+      ,.lce_cmd_yumi_i(lce_cmd_yumi_i)
       );
 
 

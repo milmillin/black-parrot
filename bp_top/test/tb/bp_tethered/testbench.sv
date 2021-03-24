@@ -562,7 +562,7 @@ module testbench
               ,.lce_cmd_yumi_i(lce_cmd_yumi_o)
               ,.lce_cmd_o_i(lce_cmd_o)
               ,.lce_cmd_o_v_i(lce_cmd_v_o)
-              ,.lce_cmd_o_ready_i(lce_cmd_ready_i)
+              ,.lce_cmd_o_ready_i(lce_cmd_yumi_i)
               );
         end
     end

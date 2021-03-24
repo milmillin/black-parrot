@@ -221,7 +221,7 @@ module bp_core
 
      ,.lce_cmd_o(lce_cmd_o[0])
      ,.lce_cmd_v_o(lce_cmd_v_o[0])
-     ,.lce_cmd_ready_i(lce_cmd_ready_i[0])
+     ,.lce_cmd_yumi_i(lce_cmd_ready_i[0] & lce_cmd_v_o[0])
      );
 
   bp_lce
@@ -283,7 +283,7 @@ module bp_core
 
      ,.lce_cmd_o(lce_cmd_o[1])
      ,.lce_cmd_v_o(lce_cmd_v_o[1])
-     ,.lce_cmd_ready_i(lce_cmd_ready_i[1])
+     ,.lce_cmd_yumi_i(lce_cmd_ready_i[1] & lce_cmd_v_o[1])
      );
 
 endmodule
