@@ -88,7 +88,7 @@ module bp_lce
     // Req: ready->valid
     , output logic [lce_req_msg_width_lp-1:0]        lce_req_o
     , output logic                                   lce_req_v_o
-    , input                                          lce_req_ready_i
+    , input                                          lce_req_yumi_i
 
     // Resp: ready->valid
     , output logic [lce_resp_msg_width_lp-1:0]       lce_resp_o
@@ -161,7 +161,7 @@ module bp_lce
 
       ,.lce_req_o(lce_req_o)
       ,.lce_req_v_o(lce_req_v_o)
-      ,.lce_req_ready_i(lce_req_ready_i)
+      ,.lce_req_yumi_i(lce_req_yumi_i)
       );
 
   // LCE Command Module
