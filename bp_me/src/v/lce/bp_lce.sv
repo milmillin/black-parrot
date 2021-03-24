@@ -93,7 +93,7 @@ module bp_lce
     // Resp: ready->valid
     , output logic [lce_resp_msg_width_lp-1:0]       lce_resp_o
     , output logic                                   lce_resp_v_o
-    , input                                          lce_resp_ready_i
+    , input                                          lce_resp_yumi_i
 
     // CCE-LCE interface
     // Cmd_i: valid->yumi
@@ -210,7 +210,7 @@ module bp_lce
 
       ,.lce_resp_o(lce_resp_o)
       ,.lce_resp_v_o(lce_resp_v_o)
-      ,.lce_resp_ready_i(lce_resp_ready_i)
+      ,.lce_resp_yumi_i(lce_resp_yumi_i)
 
       ,.lce_cmd_o(lce_cmd_o)
       ,.lce_cmd_v_o(lce_cmd_v_o)

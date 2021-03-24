@@ -104,7 +104,7 @@ module bp_lce_cmd
     // Resp: ready->valid
     , output logic [lce_resp_msg_width_lp-1:0]       lce_resp_o
     , output logic                                   lce_resp_v_o
-    , input                                          lce_resp_ready_i
+    , input                                          lce_resp_yumi_i
 
     // CCE-LCE interface
     // Cmd_i: valid->yumi
@@ -342,13 +342,13 @@ module bp_lce_cmd
               lce_resp_payload.src_id = lce_id_i;
               lce_resp.header.payload = lce_resp_payload;
               lce_resp.header.msg_type.resp = e_bedrock_resp_sync_ack;
-              lce_resp_v_o = lce_resp_ready_i;
-              lce_cmd_yumi_o = lce_resp_v_o;
+              lce_resp_v_o = lce_cmd_v_i;
+              lce_cmd_yumi_o = lce_resp_yumi_i;
 
               // reset the counter when last sync is received and ack is sent
-              cnt_clear = ((cnt_r == cnt_width_lp'(num_cce_p-1)) & lce_resp_v_o);
+              cnt_clear = ((cnt_r == cnt_width_lp'(num_cce_p-1)) & lce_cmd_yumi_o);
               // increment as long as not resetting counter
-              cnt_inc = ~cnt_clear & lce_resp_v_o;
+              cnt_inc = ~cnt_clear & lce_cmd_yumi_o;
               // sync is done when last sync is received and ack is sent
               sync_done_en = cnt_clear;
               sync_done_li = 1'b1;
@@ -377,14 +377,14 @@ module bp_lce_cmd
               tag_mem_pkt.opcode = e_cache_tag_mem_set_state;
               tag_mem_pkt_v_o = lce_cmd_v_i;
 
-              lce_resp_v_o = tag_mem_pkt_yumi_i & lce_resp_ready_i;
+              lce_resp_v_o = tag_mem_pkt_yumi_i;
               lce_resp.header.addr = lce_cmd.header.addr;
               lce_resp.header.msg_type.resp = e_bedrock_resp_inv_ack;
               lce_resp_payload.src_id = lce_id_i;
               lce_resp_payload.dst_id = lce_cmd_payload.src_id;
               lce_resp.header.payload = lce_resp_payload;
 
-              lce_cmd_yumi_o = lce_resp_v_o;
+              lce_cmd_yumi_o = lce_resp_yumi_i;
 
             end
 
@@ -573,9 +573,9 @@ module bp_lce_cmd
         lce_resp_payload.src_id = lce_id_i;
         lce_resp_payload.dst_id = lce_cmd_payload.src_id;
         lce_resp.header.payload = lce_resp_payload;
-        lce_resp_v_o = lce_cmd_v_i & lce_resp_ready_i;
+        lce_resp_v_o = lce_cmd_v_i;
 
-        lce_cmd_yumi_o = lce_resp_v_o;
+        lce_cmd_yumi_o = lce_resp_yumi_i;
 
         cache_req_complete_o = lce_cmd_yumi_o;
 
@@ -648,9 +648,9 @@ module bp_lce_cmd
         lce_resp_payload.src_id = lce_id_i;
         lce_resp_payload.dst_id = lce_cmd_payload.src_id;
         lce_resp.header.payload = lce_resp_payload;
-        lce_resp_v_o = lce_resp_ready_i & stat_buf_v_r & ~stat_buf_r.dirty[lce_cmd_way_id];
+        lce_resp_v_o = stat_buf_v_r & ~stat_buf_r.dirty[lce_cmd_way_id];
         // dequeue command only if sending null writeback
-        lce_cmd_yumi_o = lce_resp_v_o;
+        lce_cmd_yumi_o = lce_resp_yumi_i;
 
         state_n = stat_buf_v_r & stat_buf_r.dirty[lce_cmd_way_id]
                   ? e_wb_dirty_rd
@@ -693,9 +693,9 @@ module bp_lce_cmd
         lce_resp_payload.dst_id = lce_cmd_payload.src_id;
         lce_resp.header.payload = lce_resp_payload;
         lce_resp.header.size = cmd_block_size_lp;
-        lce_resp_v_o = lce_resp_ready_i & data_buf_v_r;
+        lce_resp_v_o = data_buf_v_r;
 
-        lce_cmd_yumi_o = lce_resp_v_o;
+        lce_cmd_yumi_o = lce_resp_yumi_i;
 
         state_n = lce_cmd_yumi_o
           ? e_ready

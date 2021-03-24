@@ -209,11 +209,11 @@ module bp_core
 
      ,.lce_req_o(lce_req_o[0])
      ,.lce_req_v_o(lce_req_v_o[0])
-     ,.lce_req_ready_i(lce_req_ready_i[0])
+     ,.lce_req_yumi_i(lce_req_ready_i[0] & lce_req_v_o[0])
 
      ,.lce_resp_o(lce_resp_o[0])
      ,.lce_resp_v_o(lce_resp_v_o[0])
-     ,.lce_resp_ready_i(lce_resp_ready_i[0])
+     ,.lce_resp_yumi_i(lce_resp_ready_i[0] & lce_resp_v_o[0])
 
      ,.lce_cmd_i(lce_cmd_i[0])
      ,.lce_cmd_v_i(lce_cmd_v_i[0])
@@ -271,11 +271,11 @@ module bp_core
 
      ,.lce_req_o(lce_req_o[1])
      ,.lce_req_v_o(lce_req_v_o[1])
-     ,.lce_req_ready_i(lce_req_ready_i[1])
+     ,.lce_req_yumi_i(lce_req_ready_i[1] & lce_req_v_o[1])
 
      ,.lce_resp_o(lce_resp_o[1])
      ,.lce_resp_v_o(lce_resp_v_o[1])
-     ,.lce_resp_ready_i(lce_resp_ready_i[1])
+     ,.lce_resp_yumi_i(lce_resp_ready_i[1] & lce_resp_v_o[1])
 
      ,.lce_cmd_i(lce_cmd_i[1])
      ,.lce_cmd_v_i(lce_cmd_v_i[1])
