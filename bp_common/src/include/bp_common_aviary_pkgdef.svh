@@ -750,7 +750,8 @@
     '{icache_fill_width     : 64
       ,dcache_fill_width    : 64
       ,acache_fill_width    : 64
-      ,paddr_width          : 44
+      ,paddr_width          : 42
+      ,dram_max_size        : (1 << 40)
       ,l2_en                : 0
       ,itlb_els_4k          : 8
       ,itlb_els_1g          : 0
