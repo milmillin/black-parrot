@@ -221,8 +221,8 @@
 
       ,itlb_els_4k : 8
       ,dtlb_els_4k : 8
-      ,itlb_els_1g : 1
-      ,dtlb_els_1g : 1
+      ,itlb_els_1g : 0
+      ,dtlb_els_1g : 0
 
       ,lr_sc                : e_l1
       ,amo_swap             : e_none
