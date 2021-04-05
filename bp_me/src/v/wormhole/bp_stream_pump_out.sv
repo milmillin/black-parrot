@@ -139,7 +139,7 @@ module bp_stream_pump_out
           fsm_ready_and_o = mem_ready_and_i & mem_v_o;
           
           cnt_up  = fsm_ready_and_o & ~is_last_cnt;
-          set_cnt = fsm_ready_and_o & ~streaming_r;
+          set_cnt = ~streaming_r;
 
           mem_header_cast_o.addr = { fsm_base_header_cast_i.addr[paddr_width_p-1:stream_offset_width_lp+data_len_width_lp]
                                    , wrap_around_cnt
@@ -153,7 +153,7 @@ module bp_stream_pump_out
           fsm_ready_and_o = is_last_cnt ? (mem_ready_and_i & mem_v_o) : fsm_v_i;
 
           cnt_up  = fsm_v_i & ~is_last_cnt;
-          set_cnt = fsm_v_i & ~streaming_r;
+          set_cnt = ~streaming_r;
         end
       
       mem_data_o = fsm_data_i;

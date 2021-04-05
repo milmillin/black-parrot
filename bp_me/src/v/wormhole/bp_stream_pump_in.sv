@@ -109,7 +109,7 @@ module bp_stream_pump_in
        critical_addr_reg
         (.clk_i(clk_i)
         ,.data_i(mem_header_lo.addr[0+:block_offset_width_lp])
-        ,.en_i(fsm_ready_and_i & fsm_v_o & ~streaming_r)
+        ,.en_i(~streaming_r)
         ,.data_o(critical_addr_r)
         );
 

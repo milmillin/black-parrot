@@ -283,24 +283,27 @@ module bp_me_cce_to_cache
           begin
             cmd_state_n = CLEAR_TAG; 
           end
-        CLEAR_TAG:
-          begin
-            cache_pkt.opcode = TAGST;
-            cache_pkt.data = '0;
-            cache_pkt.addr = {
-              {(caddr_width_p-lg_sets_lp-lg_ways_lp-block_offset_width_lp){1'b0}},
-              tagst_sent_r[0+:lg_sets_lp+lg_ways_lp],
-              {(block_offset_width_lp){1'b0}}
-            };
-            cache_pkt.mask = '1;
+        CLEAR_TAG: begin
+          cache_pkt_v_o = tagst_sent_r != (l2_assoc_p*l2_sets_p);
+          cache_pkt.opcode = TAGST;
+          cache_pkt.data = '0;
+          cache_pkt.addr = {
+            {(caddr_width_p-lg_sets_lp-lg_ways_lp-block_offset_width_lp){1'b0}},
+            tagst_sent_r[0+:lg_sets_lp+lg_ways_lp],
+            {(block_offset_width_lp){1'b0}}
+          };
 
-            cache_pkt_v_o = cache_pkt_ready_i & (tagst_sent_r != (l2_assoc_p*l2_sets_p));
-            tagst_sent_n = tagst_sent_r + cache_pkt_v_o;
-            tagst_received_n = tagst_received_r + cache_yumi_o;
-            cmd_state_n = (tagst_sent_r == l2_assoc_p*l2_sets_p) & (tagst_received_r == l2_assoc_p*l2_sets_p) 
-              ? READY 
-              : CLEAR_TAG;
-          end 
+          tagst_sent_n = (cache_pkt_v_o & cache_pkt_ready_i)
+            ? tagst_sent_r + 1
+            : tagst_sent_r;
+          tagst_received_n = cache_v_i
+            ? tagst_received_r + 1
+            : tagst_received_r;
+
+          cmd_state_n = (tagst_sent_r == l2_assoc_p*l2_sets_p) & (tagst_received_r == l2_assoc_p*l2_sets_p)
+            ? READY
+            : CLEAR_TAG;
+        end
         READY:
           begin
             case (mem_cmd_header_lo.msg_type)
@@ -356,12 +359,12 @@ module bp_me_cce_to_cache
                 // This mask is only used for the LM/SM operations for >64 bit mask operations
                 cache_pkt.mask = cache_pkt_mask_lo;
               end
-            cache_pkt_v_o  = cache_pkt_ready_i & mem_cmd_v_lo;
+            cache_pkt_v_o = mem_cmd_v_lo;
             // send ready_and signal back to pump_out
             mem_cmd_ready_and_li = cache_pkt_ready_i;
 
             mem_resp_header_li = mem_cmd_header_lo; // return the same critical addr back to stream_fifo
-            mem_resp_v_li      = cache_pkt_v_o;
+            mem_resp_v_li      = cache_pkt_v_o & cache_pkt_ready_i;
 
             cmd_state_n = (mem_cmd_stream_new_lo & mem_cmd_v_lo & mem_cmd_ready_and_li) ? STREAM : READY;
           end
@@ -371,9 +374,9 @@ module bp_me_cce_to_cache
             cache_pkt.addr = mem_cmd_stream_addr_lo[0+:caddr_width_p];
             cache_pkt.mask = cache_pkt_mask_lo;
             cache_pkt.data = cache_pkt_data_lo;
+            cache_pkt_v_o = mem_cmd_v_lo;
             // send ready_and signal back to pump_out
             mem_cmd_ready_and_li = cache_pkt_ready_i;
-            cache_pkt_v_o = mem_cmd_ready_and_li & mem_cmd_v_lo;
 
             // Transition back to ready once we've completely sent out the stream
             cmd_state_n = mem_cmd_done_lo ? READY : STREAM;

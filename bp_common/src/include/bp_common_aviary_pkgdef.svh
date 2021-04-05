@@ -234,11 +234,11 @@
       ,dcache_sets          : 64
       ,dcache_assoc         : 8
       ,dcache_block_width   : 512
-      ,dcache_fill_width    : 512
+      ,dcache_fill_width    : 64
       ,icache_sets          : 64
       ,icache_assoc         : 8
       ,icache_block_width   : 512
-      ,icache_fill_width    : 512
+      ,icache_fill_width    : 64
       ,acache_sets          : 64
       ,acache_assoc         : 8
       ,acache_block_width   : 512
@@ -385,10 +385,10 @@
       ,dcache_sets        : 128
       ,dcache_assoc       : 4
       ,dcache_block_width : 256
-      ,dcache_fill_width  : 256
-      ,l2_data_width      : 256
-      ,l2_fill_width      : 256
-      ,mem_noc_flit_width : 256
+      ,dcache_fill_width  : 128
+      ,l2_data_width      : 128
+      ,l2_fill_width      : 128
+      ,mem_noc_flit_width : 128
       ,default : "inv"
       };
   `bp_aviary_derive_cfg(bp_unicore_l1_hetero_cfg_p
@@ -453,6 +453,8 @@
       ,num_cce       : 1
       ,num_lce       : 2
       ,l1_coherent   : 1
+      ,dcache_fill_width : 512
+      ,icache_fill_width : 512
       ,default : "inv"
       };
   `bp_aviary_derive_cfg(bp_multicore_1_cfg_p
@@ -747,6 +749,8 @@
   // Half core configs
   localparam bp_proc_param_s bp_unicore_half_override_p =
     '{num_lce  : 1
+      ,dcache_fill_width    : 512
+      ,icache_fill_width    : 512
       ,default : "inv"
       };
   `bp_aviary_derive_cfg(bp_unicore_half_cfg_p

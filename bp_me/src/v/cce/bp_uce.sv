@@ -99,6 +99,7 @@ module bp_uce
   `bp_cast_o(bp_cache_data_mem_pkt_s, data_mem_pkt);
   `bp_cast_o(bp_cache_stat_mem_pkt_s, stat_mem_pkt);
 
+  bp_bedrock_uce_mem_msg_header_s cmd_header_lo, resp_header_li;
   bp_bedrock_uce_mem_payload_s cmd_payload;
   bp_bedrock_uce_mem_payload_s resp_payload;
   assign resp_payload = resp_header_li.payload;
@@ -271,7 +272,6 @@ module bp_uce
      ,.data_o(dirty_stat_r)
      );
 
-  bp_bedrock_uce_mem_msg_header_s cmd_header_lo, resp_header_li;
   logic [fill_width_p-1:0] cmd_data_lo, resp_data_li;
   logic cmd_v_lo, cmd_ready_and_li;
   logic resp_v_li, resp_ready_and_lo;
