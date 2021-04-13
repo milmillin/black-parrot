@@ -314,7 +314,7 @@ module bp_be_dcache
 
   logic [assoc_p-1:0] load_hit_tl, store_hit_tl, way_v_tl;
   for (genvar i = 0; i < assoc_p; i++) begin: tag_comp_tl
-    wire tag_match_tl      = (ptag_i == tag_mem_data_lo[i].tag);
+    wire tag_match_tl      = ~ptag_uncached_i & (ptag_i == tag_mem_data_lo[i].tag);
     assign way_v_tl[i]     = (tag_mem_data_lo[i].state != e_COH_I);
     assign load_hit_tl[i]  = tag_match_tl & (tag_mem_data_lo[i].state != e_COH_I);
     assign store_hit_tl[i] = tag_match_tl & (tag_mem_data_lo[i].state inside {e_COH_M, e_COH_E});
@@ -405,12 +405,12 @@ module bp_be_dcache
      );
 
   bsg_dff_en
-   #(.width_p(3*assoc_p))
+   #(.width_p(1+3*assoc_p))
    hit_tv_reg
     (.clk_i(~clk_i)
      ,.en_i(tv_we | cache_req_critical_i)
-     ,.data_i({(way_v_tl | cache_req_critical_i), (store_hit_tl | cache_req_critical_i), (load_hit_tl | cache_req_critical_i)})
-     ,.data_o({way_v_tv_r, store_hit_tv_r, load_hit_tv_r})
+     ,.data_i({cache_req_critical_i, (way_v_tl | cache_req_critical_i), (store_hit_tl | cache_req_critical_i), (load_hit_tl | cache_req_critical_i)})
+     ,.data_o({uncached_hit_tv_r, way_v_tv_r, store_hit_tv_r, load_hit_tv_r})
      );
 
   bsg_dff_en
@@ -547,24 +547,24 @@ module bp_be_dcache
   wire load_miss_tv   = v_tv_r & decode_tv_r.load_op & ~load_hit_tv & ~uncached_op_tv_r;
   wire store_miss_tv  = v_tv_r & decode_tv_r.store_op & ~decode_tv_r.sc_op & ~store_hit_tv & ~uncached_op_tv_r & (writethrough_p == 0);
   wire lr_miss_tv     = v_tv_r & decode_tv_r.lr_op & ~store_hit_tv & ~uncached_op_tv_r;
-  wire engine_miss_tv = v_tv_r & (cache_req_v_o & ~cache_req_yumi_i);
+  wire uc_miss_tv     = v_tv_r & uncached_op_tv_r & decode_tv_r.load_op & ~uncached_hit_tv_r;
 
-  wire any_miss_tv = load_miss_tv | store_miss_tv | lr_miss_tv | engine_miss_tv;
+  wire any_miss_tv = load_miss_tv | store_miss_tv | lr_miss_tv | uc_miss_tv;
 
   assign early_data_o = (decode_tv_r.sc_op & ~uncached_op_tv_r)
     ? (sc_success != 1'b1)
     : early_data;
 
   assign early_v_o = v_tv_r
-      // Uncached Load
-    & ((uncached_op_tv_r & decode_tv_r.load_op)
-      // Uncached Store
+    & (// Uncached Load
+       (uncached_op_tv_r & (decode_tv_r.load_op & uncached_hit_tv_r))
+       // Uncached Store
        | (uncached_op_tv_r & (decode_tv_r.store_op & ~decode_tv_r.amo_op & cache_req_yumi_i))
-      // Uncached AMO
+       // Uncached AMO
        | (uncached_op_tv_r & (decode_tv_r.amo_op & (decode_tv_r.rd_addr == '0) & cache_req_yumi_i))
-      // Fencei
+       // Fencei
        | (decode_tv_r.fencei_op & (~gdirty_r | (coherent_p == 1)))
-      // Cached load / store
+       // Cached load / store
        | (cached_op_tv_r & ~any_miss_tv)
        );
 
