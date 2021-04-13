@@ -425,6 +425,10 @@ module bp_be_calculator_top
       comp_stage_n[1].fflags_w_v &= exc_stage_n[1].v;
       comp_stage_n[2].fflags_w_v &= exc_stage_n[2].v;
       comp_stage_n[3].fflags_w_v &= exc_stage_n[3].v;
+
+      // Inject D$ miss so we don't accidentally write back the data
+      comp_stage_n[2].ird_w_v    &= ~pipe_mem_dcache_miss_lo;
+      comp_stage_n[2].frd_w_v    &= ~pipe_mem_dcache_miss_lo;
     end
 
   bsg_dff
@@ -470,7 +474,7 @@ module bp_be_calculator_top
           exc_stage_n[1].exc.store_access_fault |= pipe_mem_store_access_fault_lo;
           exc_stage_n[1].exc.store_page_fault   |= pipe_mem_store_page_fault_lo;
 
-          exc_stage_n[2].exc.dcache_miss        |= pipe_mem_dcache_miss_lo;
+          exc_stage_n[2].spec.dcache_miss       |= pipe_mem_dcache_miss_lo;
           exc_stage_n[2].spec.fencei            |= pipe_mem_fencei_lo;
           exc_stage_n[2].exc.cmd_full           |= |{exc_stage_r[2].exc, exc_stage_r[2].spec} & cmd_full_n_i;
     end

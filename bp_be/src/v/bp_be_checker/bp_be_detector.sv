@@ -258,7 +258,8 @@ module bp_be_detector
       // Combine all structural hazard information
       struct_haz_v = cfg_bus_cast_i.freeze
                      | ptw_busy_i
-                     | (~mem_ready_i & isd_status_cast_i.mem_v)
+                     //| (~mem_ready_i & isd_status_cast_i.mem_v)
+                     | ~mem_ready_i
                      | (~long_ready_i & isd_status_cast_i.long_v)
                      | (irq_pending_i & ~replay_pending_i)
                      | cmd_haz_v;
