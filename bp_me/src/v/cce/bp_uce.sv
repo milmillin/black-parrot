@@ -595,7 +595,7 @@ module bp_uce
           end
         e_ready:
           begin
-            if ((uc_store_v_li && (~uc_hit_v_li || (l1_writethrough_p == 1))) || wt_store_v_li)
+            if (((uc_store_v_li || uc_amo_v_li) && (~uc_hit_v_li || (l1_writethrough_p == 1))) || wt_store_v_li)
               begin
                 mem_cmd_cast_o.header.msg_type       = e_bedrock_mem_uc_wr;
                 mem_cmd_cast_o.header.addr           = cache_req_cast_i.addr;
@@ -682,6 +682,7 @@ module bp_uce
               mem_cmd_cast_o.header.msg_type       = uc_load_v_r ? e_bedrock_mem_uc_rd : uc_amo_v_r ? e_bedrock_mem_amo : e_bedrock_mem_uc_wr;
               mem_cmd_cast_o.header.addr           = cache_req_r.addr;
               mem_cmd_cast_o.header.size           = bp_bedrock_msg_size_e'(cache_req_r.size);
+              mem_cmd_cast_o.header.subop          = mem_wr_subop;
               mem_cmd_cast_payload.lce_id          = lce_id_i;
               mem_cmd_cast_o.header.payload        = mem_cmd_cast_payload;
               mem_cmd_cast_o.header.subop          = mem_wr_subop;
