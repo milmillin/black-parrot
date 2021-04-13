@@ -128,6 +128,11 @@ module bp_be_calculator_top
   logic [dpath_width_gp-1:0] pipe_ctl_data_lo, pipe_int_data_lo, pipe_aux_data_lo, pipe_mem_early_data_lo, pipe_mem_final_data_lo, pipe_sys_data_lo, pipe_mul_data_lo, pipe_fma_data_lo;
   rv64_fflags_s pipe_aux_fflags_lo, pipe_fma_fflags_lo;
 
+  bp_be_wb_pkt_s pipe_mem_late_iwb_pkt;
+  logic pipe_mem_late_iwb_pkt_v, pipe_mem_late_iwb_pkt_yumi;
+  bp_be_wb_pkt_s pipe_mem_late_fwb_pkt;
+  logic pipe_mem_late_fwb_pkt_v, pipe_mem_late_fwb_pkt_yumi;
+
   // Generating match vector for bypass
   logic [2:0][pipe_stage_els_lp-1:0] match_rs;
   logic [pipe_stage_els_lp-1:0][dpath_width_gp-1:0] forward_data;
@@ -322,9 +327,15 @@ module bp_be_calculator_top
      ,.store_access_fault_v_o(pipe_mem_store_access_fault_lo)
      ,.store_page_fault_v_o(pipe_mem_store_page_fault_lo)
      ,.early_data_o(pipe_mem_early_data_lo)
-     ,.final_data_o(pipe_mem_final_data_lo)
      ,.early_v_o(pipe_mem_early_data_lo_v)
+     ,.final_data_o(pipe_mem_final_data_lo)
      ,.final_v_o(pipe_mem_final_data_lo_v)
+     ,.late_iwb_pkt_o(pipe_mem_late_iwb_pkt)
+     ,.late_iwb_pkt_v_o(pipe_mem_late_iwb_pkt_v)
+     ,.late_iwb_pkt_yumi_i(pipe_mem_late_iwb_pkt_yumi)
+     ,.late_fwb_pkt_o(pipe_mem_late_fwb_pkt)
+     ,.late_fwb_pkt_v_o(pipe_mem_late_fwb_pkt_v)
+     ,.late_fwb_pkt_yumi_i(pipe_mem_late_fwb_pkt_yumi)
 
      ,.trans_info_i(trans_info_lo)
      ,.replay_pending_o(replay_pending_o)
@@ -473,11 +484,14 @@ module bp_be_calculator_top
      ,.data_o(exc_stage_r)
      );
 
-  assign pipe_long_idata_lo_yumi = pipe_long_idata_lo_v & ~comp_stage_r[4].ird_w_v;
-  assign pipe_long_fdata_lo_yumi = pipe_long_fdata_lo_v & ~comp_stage_r[5].frd_w_v & ~comp_stage_r[5].fflags_w_v;
+  assign pipe_mem_late_iwb_pkt_yumi = pipe_mem_late_iwb_pkt_v & ~comp_stage_r[4].ird_w_v;
+  assign pipe_mem_late_fwb_pkt_yumi = pipe_mem_late_fwb_pkt_v & ~comp_stage_r[5].frd_w_v;
 
-  assign iwb_pkt_o = pipe_long_idata_lo_yumi ? long_iwb_pkt : comp_stage_r[4];
-  assign fwb_pkt_o = pipe_long_fdata_lo_yumi ? long_fwb_pkt : comp_stage_r[5];
+  assign pipe_long_idata_lo_yumi = pipe_long_idata_lo_v & ~pipe_mem_late_iwb_pkt_v & ~comp_stage_r[4].ird_w_v;
+  assign pipe_long_fdata_lo_yumi = pipe_long_fdata_lo_v & ~pipe_mem_late_fwb_pkt_v & ~comp_stage_r[5].frd_w_v & ~comp_stage_r[5].fflags_w_v;
+
+  assign iwb_pkt_o = pipe_mem_late_iwb_pkt_yumi ? pipe_mem_late_iwb_pkt : pipe_long_idata_lo_yumi ? long_iwb_pkt : comp_stage_r[4];
+  assign fwb_pkt_o = pipe_mem_late_fwb_pkt_yumi ? pipe_mem_late_fwb_pkt : pipe_long_fdata_lo_yumi ? long_fwb_pkt : comp_stage_r[5];
 
 endmodule
 
