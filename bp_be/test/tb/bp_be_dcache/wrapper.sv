@@ -220,7 +220,6 @@ module wrapper
        ,.ptag_uncached_i(rolly_uncached_r[i])
 
        ,.flush_i(poison_li[i])
-       ,.replay_pending_o()
 
        ,.cache_req_v_o(cache_req_v_lo[i])
        ,.cache_req_o(cache_req_lo[i])

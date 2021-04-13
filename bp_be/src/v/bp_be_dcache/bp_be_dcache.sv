@@ -138,7 +138,6 @@ module bp_be_dcache
 
    // ctrl
    , input                             flush_i
-   , output                            replay_pending_o
 
    // D$ Engine Interface
    , output logic [dcache_req_width_lp-1:0]          cache_req_o
@@ -1298,8 +1297,6 @@ module bp_be_dcache
         assign load_reservation_match_tv = '0;
         assign cache_lock                = '0;
     end
-
-  assign replay_pending_o = 1'b0;
 
   // synopsys translate_off
   `declare_bp_cfg_bus_s(domain_width_p, core_id_width_p, cce_id_width_p, lce_id_width_p);

@@ -66,7 +66,6 @@ module bp_be_pipe_mem
    , input                                late_fwb_pkt_yumi_i
 
    , input [trans_info_width_lp-1:0]      trans_info_i
-   , output logic                         replay_pending_o
 
    // D$-LCE Interface
    // signals to LCE
@@ -278,7 +277,6 @@ module bp_be_pipe_mem
       ,.late_yumi_i(dcache_late_yumi)
 
       ,.flush_i(flush_i)
-      ,.replay_pending_o(replay_pending_o)
 
       // D$-LCE Interface
       ,.cache_req_o(cache_req_cast_o)
