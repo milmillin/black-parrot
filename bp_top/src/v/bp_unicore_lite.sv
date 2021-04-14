@@ -422,7 +422,7 @@ module bp_unicore_lite
 
      ,.mem_cmd_i(cfg_cmd)
      ,.mem_cmd_v_i(cfg_cmd_v_li)
-     ,.mem_cmd_ready_o(cfg_cmd_ready_lo)
+     ,.mem_cmd_ready_and_o(cfg_cmd_ready_lo)
 
      ,.mem_resp_o(cfg_resp)
      ,.mem_resp_v_o(cfg_resp_v_lo)

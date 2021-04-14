@@ -32,8 +32,8 @@ module bp_cfg
    , output                             cce_ucode_v_o
    , output                             cce_ucode_w_o
    , output [cce_pc_width_p-1:0]        cce_ucode_addr_o
-   , output [cce_instr_width_gp-1:0]     cce_ucode_data_o
-   , input [cce_instr_width_gp-1:0]      cce_ucode_data_i
+   , output [cce_instr_width_gp-1:0]    cce_ucode_data_o
+   , input [cce_instr_width_gp-1:0]     cce_ucode_data_i
    );
 
   `declare_bp_cfg_bus_s(domain_width_p, core_id_width_p, cce_id_width_p, lce_id_width_p);
