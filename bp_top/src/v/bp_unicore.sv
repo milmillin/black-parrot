@@ -60,7 +60,7 @@ module bp_unicore
 
   bp_bedrock_uce_mem_msg_header_s mem_cmd_header_lo;
   logic [uce_mem_data_width_lp-1:0] mem_cmd_data_lo;
-  logic mem_cmd_v_lo, mem_cmd_last_lo mem_cmd_ready_and_li;
+  logic mem_cmd_v_lo, mem_cmd_last_lo, mem_cmd_ready_and_li;
   bp_bedrock_uce_mem_msg_header_s mem_resp_header_li;
   logic [uce_mem_data_width_lp-1:0] mem_resp_data_li;
   logic mem_resp_v_li, mem_resp_last_li, mem_resp_ready_and_lo;

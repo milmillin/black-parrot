@@ -99,10 +99,9 @@ module bp_unicore_lite
   logic timer_irq_li, software_irq_li, external_irq_li;
 
   bp_bedrock_uce_mem_msg_s [2:0] proc_cmd_lo;
-  logic [2:0] proc_cmd_v_lo, proc_cmd_yumi_li;
+  logic [2:0] proc_cmd_v_lo, proc_cmd_yumi_li, proc_cmd_last_lo;
   bp_bedrock_uce_mem_msg_s [2:0] proc_resp_li;
-  logic [2:0] proc_resp_v_li, proc_resp_ready_lo;
-  logic [2:0] proc_cmd_last_lo, proc_resp_last_li;
+  logic [2:0] proc_resp_v_li, proc_resp_ready_lo, proc_resp_last_li, proc_resp_yumi_lo;
 
   bp_bedrock_uce_mem_msg_s cfg_cmd_li;
   bp_bedrock_xce_mem_msg_s cfg_cmd;
@@ -348,7 +347,7 @@ module bp_unicore_lite
    #(.inputs_p(3), .lo_to_hi_p(0))
    cmd_arbiter
     (.clk_i(clk_i)
-     .ready_i(1'b1)
+     ,.ready_i(1'b1)
 
      ,.unlock_i(reset_i | cmd_arb_unlock)
 
