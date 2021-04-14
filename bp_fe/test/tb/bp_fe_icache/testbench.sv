@@ -245,8 +245,10 @@ module testbench
     ,.reset_i(reset_i)
 
     ,.mem_cmd_i(mem_cmd_lo)
+    // TODO: handshake bug likely!
     ,.mem_cmd_v_i(mem_cmd_ready_lo & mem_cmd_v_lo)
-    ,.mem_cmd_ready_o(mem_cmd_ready_lo)
+    //,.mem_cmd_v_i(mem_cmd_v_lo) // broken! valid must be gated with ready
+    ,.mem_cmd_ready_and_o(mem_cmd_ready_lo)
 
     ,.mem_resp_o(mem_resp_lo)
     ,.mem_resp_v_o(mem_resp_v_lo)
@@ -397,7 +399,7 @@ module testbench
 
      ,.mem_cmd_i(mem_cmd_lo)
      ,.mem_cmd_v_i(mem_cmd_ready_lo & mem_cmd_v_lo)
-     ,.mem_cmd_ready_i(mem_cmd_ready_lo)
+     ,.mem_cmd_ready_and_i(mem_cmd_ready_lo)
 
      ,.mem_resp_i(mem_resp_lo)
      ,.mem_resp_v_i(mem_resp_v_lo)
