@@ -44,7 +44,7 @@ module bp_me_cce_to_cache
     , output logic                        v_o
     , input                               ready_i
 
-    , input [l2_data_width_p-1:0]          data_i
+    , input [l2_data_width_p-1:0]         data_i
     , input                               v_i
     , output logic                        yumi_o
   );

@@ -51,7 +51,7 @@ module wrapper
 
    , output logic [cce_mem_msg_width_lp-1:0] mem_cmd_o
    , output                                  mem_cmd_v_o
-   , input                                   mem_cmd_ready_i
+   , input                                   mem_cmd_ready_and_i
    );
 
   `declare_bp_cfg_bus_s(domain_width_p, core_id_width_p, cce_id_width_p, lce_id_width_p);
@@ -478,7 +478,7 @@ module wrapper
 
        ,.out_msg_o(mem_cmd_lo)
        ,.out_msg_v_o(mem_cmd_v_o)
-       ,.out_msg_ready_and_i(mem_cmd_ready_i)
+       ,.out_msg_ready_and_i(mem_cmd_ready_and_i)
 
        );
 
@@ -512,6 +512,8 @@ module wrapper
     // UCE-Mem connections - BP Lite - to/from ports
     bp_bedrock_cce_mem_msg_s mem_cmd_lo;
     assign mem_cmd_o = mem_cmd_lo;
+    logic mem_cmd_yumi;
+    assign mem_cmd_yumi = mem_cmd_v_o & mem_cmd_ready_and_i;
     bp_bedrock_cce_mem_msg_s cce_mem_resp_li;
     logic cce_mem_resp_ready_lo;
     assign cce_mem_resp_li = mem_resp_i;
@@ -562,7 +564,7 @@ module wrapper
 
        ,.mem_cmd_o(mem_cmd_lo)
        ,.mem_cmd_v_o(mem_cmd_v_o)
-       ,.mem_cmd_yumi_i(mem_cmd_ready_i & mem_cmd_v_o)
+       ,.mem_cmd_yumi_i(mem_cmd_yumi)
 
        ,.mem_resp_i(fifo_mem_resp_lo)
        ,.mem_resp_v_i(fifo_mem_resp_v_lo)
