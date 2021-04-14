@@ -92,7 +92,7 @@ module testbench
   assign cfg_bus_li = cfg_bus_cast_li;
 
   logic mem_cmd_v_lo, mem_resp_v_lo;
-  logic mem_cmd_ready_lo, mem_resp_yumi_lo;
+  logic mem_cmd_ready_and_lo, mem_resp_yumi_lo;
   bp_bedrock_cce_mem_msg_s mem_cmd_lo, mem_resp_lo;
 
   logic [num_caches_p-1:0][trace_replay_data_width_lp-1:0] trace_data_lo;
@@ -259,7 +259,7 @@ module testbench
 
      ,.mem_cmd_v_o(mem_cmd_v_lo)
      ,.mem_cmd_o(mem_cmd_lo)
-     ,.mem_cmd_ready_i(mem_cmd_ready_lo)
+     ,.mem_cmd_ready_and_i(mem_cmd_ready_and_lo)
      );
 
   // Memory
@@ -275,7 +275,7 @@ module testbench
 
      ,.mem_cmd_i(mem_cmd_lo)
      ,.mem_cmd_v_i(mem_cmd_v_lo)
-     ,.mem_cmd_ready_and_o(mem_cmd_ready_lo)
+     ,.mem_cmd_ready_and_o(mem_cmd_ready_and_lo)
 
      ,.mem_resp_o(mem_resp_lo)
      ,.mem_resp_v_o(mem_resp_v_lo)
@@ -422,7 +422,7 @@ module testbench
 
      ,.mem_cmd_i(mem_cmd_lo)
      ,.mem_cmd_v_i(mem_cmd_v_lo)
-     ,.mem_cmd_ready_i(mem_cmd_ready_lo)
+     ,.mem_cmd_ready_and_i(mem_cmd_ready_and_lo)
 
      ,.mem_resp_i(mem_resp_lo)
      ,.mem_resp_v_i(mem_resp_v_lo)

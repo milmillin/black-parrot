@@ -57,7 +57,7 @@ module wrapper
 
    , output logic                                      mem_cmd_v_o
    , output logic [cce_mem_msg_width_lp-1:0]           mem_cmd_o
-   , input                                             mem_cmd_ready_i
+   , input                                             mem_cmd_ready_and_i
    );
 
    `declare_bp_bedrock_lce_if(paddr_width_p, cce_block_width_p, lce_id_width_p, cce_id_width_p, lce_assoc_p, lce);
@@ -421,7 +421,7 @@ module wrapper
 
              ,.mem_cmd_o(mem_cmd_o)
              ,.mem_cmd_v_o(mem_cmd_v_o)
-             ,.mem_cmd_yumi_i(mem_cmd_ready_i & mem_cmd_v_o)
+             ,.mem_cmd_yumi_i(mem_cmd_ready_and_i & mem_cmd_v_o)
 
              ,.mem_resp_i(mem_resp_i)
              ,.mem_resp_v_i(mem_resp_v_i)
@@ -784,7 +784,7 @@ module wrapper
 
           ,.out_msg_o(mem_cmd_lo)
           ,.out_msg_v_o(mem_cmd_v_o)
-          ,.out_msg_ready_and_i(mem_cmd_ready_i)
+          ,.out_msg_ready_and_i(mem_cmd_ready_and_i)
           );
 
      end

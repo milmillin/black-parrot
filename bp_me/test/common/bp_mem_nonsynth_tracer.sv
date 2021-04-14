@@ -21,7 +21,7 @@ module bp_mem_nonsynth_tracer
    // BP side
    , input [cce_mem_msg_width_lp-1:0]    mem_cmd_i
    , input                               mem_cmd_v_i
-   , input                               mem_cmd_ready_i
+   , input                               mem_cmd_ready_and_i
 
    , input [cce_mem_msg_width_lp-1:0]    mem_resp_i
    , input                               mem_resp_v_i
@@ -42,7 +42,7 @@ assign mem_cmd_cast_i = mem_cmd_i;
 assign mem_resp_cast_i = mem_resp_i;
 
 always_ff @(posedge clk_i) begin
-  if (mem_cmd_v_i & mem_cmd_ready_i)
+  if (mem_cmd_v_i & mem_cmd_ready_and_i)
     case (mem_cmd_cast_i.header.msg_type.mem)
       e_bedrock_mem_rd:
         $fwrite(file, "[%t] CMD  RD  : (%x) %b\n", $time, mem_cmd_cast_i.header.addr, mem_cmd_cast_i.header.size);
