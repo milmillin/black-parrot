@@ -22,8 +22,6 @@ N=${2:-1}
 # Bash array to iterate over for configurations
 cfgs=(
     "e_bp_unicore_bootrom_cfg"
-    "e_bp_multicore_1_bootrom_cfg"
-    "e_bp_multicore_1_cce_ucode_bootrom_cfg"
     )
 
 let JOBS=${#cfgs[@]}

@@ -193,6 +193,7 @@ module bp_be_dcache
   wire is_late  = (state_r == e_late);
 
   // Global signals
+  logic safe_tl_we, safe_tv_we, safe_dm_we;
   logic tl_we, tv_we, dm_we;
   logic safe_tl_we, safe_tv_we, safe_dm_we;
   logic v_tl_r, v_tv_r, v_dm_r;
@@ -398,7 +399,7 @@ module bp_be_dcache
    #(.width_p(block_width_p))
    ld_data_tv_reg
     (.clk_i(~clk_i)
-     ,.en_i((tv_we & decode_tl_r.load_op) | cache_req_critical_i)
+     ,.en_i(tv_we | cache_req_critical_i)
      ,.data_i(ld_data_tv_n)
      ,.data_o(ld_data_tv_r)
      );
@@ -416,7 +417,7 @@ module bp_be_dcache
    #(.width_p(dword_width_gp))
    st_data_tv_reg
     (.clk_i(~clk_i)
-     ,.en_i(tv_we & decode_tl_r.store_op)
+     ,.en_i(tv_we)
      ,.data_i(st_data_tl)
      ,.data_o(st_data_tv_r)
      );
