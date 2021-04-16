@@ -194,7 +194,7 @@ module bp_tile
 
      ,.mem_cmd_i(clint_mem_cmd)
      ,.mem_cmd_v_i(clint_mem_cmd_v_li)
-     ,.mem_cmd_ready_o(clint_mem_cmd_ready_lo)
+     ,.mem_cmd_ready_and_o(clint_mem_cmd_ready_lo)
 
      ,.mem_resp_o(clint_mem_resp)
      ,.mem_resp_v_o(clint_mem_resp_v_lo)
@@ -729,7 +729,7 @@ module bp_tile
 
      ,.mem_cmd_i(cache_mem_cmd_li)
      ,.mem_cmd_v_i(cache_mem_cmd_v_li)
-     ,.mem_cmd_ready_o(cache_mem_cmd_ready_lo)
+     ,.mem_cmd_ready_and_o(cache_mem_cmd_ready_lo)
 
      ,.mem_resp_o(cache_mem_resp_lo)
      ,.mem_resp_v_o(cache_mem_resp_v_lo)
@@ -838,7 +838,7 @@ module bp_tile
 
      ,.mem_cmd_i(loopback_mem_cmd)
      ,.mem_cmd_v_i(loopback_mem_cmd_v_li)
-     ,.mem_cmd_ready_o(loopback_mem_cmd_ready_lo)
+     ,.mem_cmd_ready_and_o(loopback_mem_cmd_ready_lo)
 
      ,.mem_resp_o(loopback_mem_resp)
      ,.mem_resp_v_o(loopback_mem_resp_v_lo)

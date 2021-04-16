@@ -564,7 +564,7 @@ mem_cmd_buffer
   // from CCE
   ,.v_i(mem_cmd_v)
   ,.data_i(mem_cmd)
-  ,.ready_o(mem_cmd_ready)
+  ,.ready_o(mem_cmd_ready_then)
   // to memory
   ,.v_o(mem_cmd_v_lo)
   ,.data_o(mem_cmd_lo)

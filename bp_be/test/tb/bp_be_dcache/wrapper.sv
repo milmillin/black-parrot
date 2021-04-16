@@ -315,6 +315,7 @@ module wrapper
               ,.lce_cmd_o(lce_cmd_lo[i])
               ,.lce_cmd_v_o(lce_cmd_v_lo[i])
               ,.lce_cmd_ready_then_i(lce_cmd_ready_li[i])
+              ,.lce_cmd_ready_then_i(lce_cmd_ready_and_li[i])
               );
 
            // Request out
@@ -327,7 +328,7 @@ module wrapper
            assign lce_req_link_lo[i].data = lce_req_packet_lo[i];
            assign lce_req_link_lo[i].v = lce_req_v_lo[i];
            assign lce_req_link_lo[i].ready_and_rev = 1'b0;
-           assign lce_req_ready_li[i] = lce_req_link_li[i].ready_and_rev;
+           assign lce_req_ready_and_li[i] = lce_req_link_li[i].ready_and_rev;
 
            // Command out
            assign lce_cmd_packet_lo[i].payload = lce_cmd_lo[i];
@@ -344,7 +345,7 @@ module wrapper
            // Conversion from command packet to link format
            assign lce_cmd_link_lo[i].data = lce_cmd_packet_lo[i];
            assign lce_cmd_link_lo[i].v = lce_cmd_v_lo[i];
-           assign lce_cmd_ready_li[i] = lce_cmd_link_li[i].ready_and_rev;
+           assign lce_cmd_ready_and_li[i] = lce_cmd_link_li[i].ready_and_rev;
 
            // LCE cmd demanding -> demanding conversion
            bsg_two_fifo
@@ -372,7 +373,7 @@ module wrapper
            assign lce_resp_link_lo[i].data = lce_resp_packet_lo[i];
            assign lce_resp_link_lo[i].v = lce_resp_v_lo[i];
            assign lce_resp_link_lo[i].ready_and_rev = 1'b0;
-           assign lce_resp_ready_li[i] = lce_resp_link_li[i].ready_and_rev;
+           assign lce_resp_ready_and_li[i] = lce_resp_link_li[i].ready_and_rev;
 
          end
        else if (uce_p == 1)
@@ -543,7 +544,7 @@ module wrapper
        assign cce_lce_cmd_link_lo.data = cce_lce_cmd_packet_lo;
        assign cce_lce_cmd_link_lo.v = cce_lce_cmd_v_lo;
        assign cce_lce_cmd_link_lo.ready_and_rev = '0;
-       assign cce_lce_cmd_ready_li = cce_lce_cmd_link_li.ready_and_rev;
+       assign cce_lce_cmd_ready_and_li = cce_lce_cmd_link_li.ready_and_rev;
 
        // Response adapter to convert from the link format to the CCE
        // response input  format
