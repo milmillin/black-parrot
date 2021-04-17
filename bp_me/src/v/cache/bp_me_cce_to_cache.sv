@@ -74,6 +74,20 @@ module bp_me_cce_to_cache
   logic [counter_width_lp-1:0] cmd_counter_r, cmd_counter_n;
   logic [counter_width_lp-1:0] cmd_max_count_r, cmd_max_count_n;
 
+  logic cmd_clear_tag_done;
+  wire cmd_clear_tag_done_en = (cmd_state_r == CLEAR_TAG) & (cmd_state_n == READY);
+  bsg_dff_reset_en
+    #(.width_p(1)
+      ,.reset_val_p(0)
+      )
+    cmd_clear_tag_done_r
+     (.clk_i(clk_i)
+      ,.reset_i(reset_i)
+      ,.en_i(cmd_clear_tag_done_en)
+      ,.data_i(1'b1)
+      ,.data_o(cmd_clear_tag_done)
+      );
+
   bp_bedrock_cce_mem_msg_s mem_cmd_cast_i, mem_resp_cast_o;
 
   assign mem_cmd_cast_i = mem_cmd_i;
@@ -324,7 +338,7 @@ module bp_me_cce_to_cache
       end
       RESP_READY: begin
         is_resp_ready = 1'b1;
-        if (mem_cmd_v_lo)
+        if (mem_cmd_v_lo & cmd_clear_tag_done)
           begin
             case (mem_cmd_lo.header.size)
               e_bedrock_msg_size_1
