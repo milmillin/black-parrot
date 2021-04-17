@@ -195,7 +195,6 @@ module bp_be_dcache
   // Global signals
   logic safe_tl_we, safe_tv_we, safe_dm_we;
   logic tl_we, tv_we, dm_we;
-  logic safe_tl_we, safe_tv_we, safe_dm_we;
   logic v_tl_r, v_tv_r, v_dm_r;
   logic gdirty_r, cache_lock;
   logic sram_hazard_flush, miss_request_flush, engine_flush;
@@ -1113,7 +1112,8 @@ module bp_be_dcache
   // A similar scheme could be adopted for a non-blocking version, where we snoop the bank
   assign data_mem_pkt_yumi_o = (data_mem_pkt_cast_i.opcode == e_cache_data_mem_uncached)
                                ? ~cache_lock & data_mem_pkt_v_i
-                               : ~cache_lock & data_mem_pkt_v_i & ~|data_mem_fast_read & ~wbuf_v_lo & ~wbuf_v_li;
+                               : ~cache_lock & data_mem_pkt_v_i & ~|data_mem_fast_read & ~wbuf_v_lo;
+                               //wbuf_v_li
 
 
   logic [lg_dcache_assoc_lp-1:0] data_mem_pkt_way_r;

@@ -243,6 +243,7 @@
     logic dtlb_store_miss;
     logic itlb_fill;
     logic dtlb_fill;
+    logic fencei_dirty;
     logic _interrupt;
     logic cmd_full;
   }  bp_be_exception_s;
@@ -250,7 +251,7 @@
   typedef struct packed
   {
     logic dcache_miss;
-    logic fencei;
+    logic fencei_clean;
     logic sfence_vma;
     logic dbreak;
     logic dret;

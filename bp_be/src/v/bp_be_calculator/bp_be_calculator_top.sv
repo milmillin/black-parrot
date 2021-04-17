@@ -112,7 +112,7 @@ module bp_be_calculator_top
   logic pipe_mem_dtlb_store_miss_lo;
   logic pipe_mem_dtlb_load_miss_lo;
   logic pipe_mem_dcache_miss_lo;
-  logic pipe_mem_fencei_lo;
+  logic pipe_mem_fencei_clean_lo, pipe_mem_fencei_dirty_lo;
   logic pipe_mem_load_misaligned_lo;
   logic pipe_mem_load_access_fault_lo;
   logic pipe_mem_load_page_fault_lo;
@@ -318,7 +318,8 @@ module bp_be_calculator_top
      ,.tlb_store_miss_v_o(pipe_mem_dtlb_store_miss_lo)
      ,.tlb_load_miss_v_o(pipe_mem_dtlb_load_miss_lo)
      ,.cache_miss_v_o(pipe_mem_dcache_miss_lo)
-     ,.fencei_v_o(pipe_mem_fencei_lo)
+     ,.fencei_clean_v_o(pipe_mem_fencei_clean_lo)
+     ,.fencei_dirty_v_o(pipe_mem_fencei_dirty_lo)
      ,.load_misaligned_v_o(pipe_mem_load_misaligned_lo)
      ,.load_access_fault_v_o(pipe_mem_load_access_fault_lo)
      ,.load_page_fault_v_o(pipe_mem_load_page_fault_lo)
@@ -473,7 +474,8 @@ module bp_be_calculator_top
           exc_stage_n[1].exc.store_page_fault   |= pipe_mem_store_page_fault_lo;
 
           exc_stage_n[2].spec.dcache_miss       |= pipe_mem_dcache_miss_lo;
-          exc_stage_n[2].spec.fencei            |= pipe_mem_fencei_lo;
+          exc_stage_n[2].spec.fencei_clean      |= pipe_mem_fencei_clean_lo;
+          exc_stage_n[2].exc.fencei_dirty       |= pipe_mem_fencei_dirty_lo;
           exc_stage_n[2].exc.cmd_full           |= |{exc_stage_r[2].exc, exc_stage_r[2].spec} & cmd_full_n_i;
     end
 
