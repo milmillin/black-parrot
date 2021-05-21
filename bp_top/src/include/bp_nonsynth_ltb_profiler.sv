@@ -39,12 +39,13 @@ module bp_nonsynth_ltb_profiler
     );
 
   logic r_v_r;
-  bsg_dff_reset #(.width_p(1))
+  logic [vaddr_width_p-1:0] r_addr_r;
+  bsg_dff_reset #(.width_p(1+vaddr_width_p))
    r_reg
    (.clk_i(clk_i)
     ,.reset_i(reset_i)
-    ,.data_i(r_v_i)
-    ,.data_o(r_v_r)
+    ,.data_i({r_v_i, r_addr_i})
+    ,.data_o({r_v_r, r_addr_r})
    );
 
   integer clk_cnt;
@@ -57,8 +58,8 @@ module bp_nonsynth_ltb_profiler
     begin
       file_name   = $sformatf("%s_w.stats", ltb_trace_file_p);
       file        = $fopen(file_name, "w");
-      file_name_r = $sformatf("%s_r.stats", ltb_trace_file_p);
-      file_r      = $fopen(file_name_r, "w");
+      // file_name_r = $sformatf("%s_r.stats", ltb_trace_file_p);
+      // file_r      = $fopen(file_name_r, "w");
     end
 
   always_ff @(negedge clk_i)
@@ -67,14 +68,10 @@ module bp_nonsynth_ltb_profiler
     end
     else begin
       clk_cnt <= clk_cnt + 1;
-      if (r_v_i) begin
-        $fwrite(file_r, "%d,r,[%x],",
-          clk_cnt,
-          r_addr_i,
-          );
-      end
       if (r_v_r) begin
-        $fwrite(file_r, "%d,%d,%d,%d,%d,0\n",
+        $fwrite(file, "%d,r,[%x],%d,%d,%d,%d,%d,0\n",
+          clk_cnt,
+          r_addr_r,
           pred_taken_o,
           pred_conf_o,
           r_spec_cnt,
@@ -100,7 +97,7 @@ module bp_nonsynth_ltb_profiler
   int tmp;
   final
     begin
-      $display("Hello from LTB profilerrrr\n");
+      $display("Hello from LTB profiler\n");
       
       /*
       tmp = branch_histo.first(key);

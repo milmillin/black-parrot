@@ -131,13 +131,17 @@ module bp_fe_ltb
   for (genvar i = 0; i < ltb_els_lp; i++)
     begin : spec_counters
       // logic reset_spec = pred_v_n & ~pred_taken_n & r_idx_one_hot[i];
-      logic reset_mispredict = w_v_i & ~rw_same_addr & br_mispredict_i &
+      logic mispred_not_taken = w_v_i & ~rw_same_addr & br_mispredict_i &
                                 ~br_taken_i & w_idx_one_hot[i];
+      logic mispred_taken     = w_v_i & ~rw_same_addr & br_mispredict_i &
+                                 br_taken_i & w_idx_one_hot[i];
       
       logic [ltb_cnt_width_p-1:0] spec_cnt_n;
       always_comb begin
-        if (reset_i | reset_mispredict)
+        if (reset_i | mispred_not_taken)
           spec_cnt_n = '0;
+        else if (mispred_taken)
+          spec_cnt_n = non_spec_cnt_plus1;
         else if (w_v_i & ~rw_same_addr & ~br_taken_i & w_idx_one_hot[i])
           spec_cnt_n = spec_cnt_r[i] - non_spec_cnt_plus1;
         else if (r_v_i & ~r_retry_i & r_idx_one_hot[i] & r_tag_li == tag_mem_data_lo.tag) begin
@@ -228,5 +232,6 @@ module bp_fe_ltb
 
   // debug
   logic [ltb_cnt_width_p-1:0] r_spec_cnt = spec_cnt_r[r_idx_r];
+  logic [ltb_cnt_width_p-1:0] w_spec_cnt = spec_cnt_r[w_idx_li];
 endmodule
 
