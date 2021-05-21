@@ -503,6 +503,35 @@ module testbench
 
            ,.commit_v_i(calculator.commit_pkt_cast_o.instret)
            );
+      
+      bind bp_fe_ltb
+        bp_nonsynth_ltb_profiler
+        #(.bp_params_p(bp_params_p))
+        ltb_profiler
+          (.clk_i(clk_i & testbench.branch_profile_en_lo)
+           ,.reset_i(reset_i)
+
+            ,.init_done_o(init_done_o)
+            
+            ,.r_v_i(r_v_i)
+            ,.r_addr_i(r_addr_i)
+            ,.pred_v_o(pred_v_o)
+            ,.pred_conf_o(pred_conf_o)
+            ,.pred_taken_o(pred_taken_o)
+            ,.pred_non_spec_cnt_o(pred_non_spec_cnt_o)
+            ,.pred_trip_cnt_o(pred_trip_cnt_o)
+            ,.r_spec_cnt(r_spec_cnt)
+
+            ,.w_v_i(w_v_i)
+            ,.br_mispredict_i(br_mispredict_i)
+            ,.br_taken_i(br_taken_i)
+            ,.br_conf_i(br_conf_i)
+            ,.br_src_addr_i(br_src_addr_i)
+            ,.br_non_spec_cnt_i(br_non_spec_cnt_i)
+            ,.br_trip_cnt_i(br_trip_cnt_i)
+            ,.w_yumi_o(w_yumi_o)
+            ,.w_spec_cnt(w_spec_cnt)
+          );
 
       if (multicore_p)
         begin

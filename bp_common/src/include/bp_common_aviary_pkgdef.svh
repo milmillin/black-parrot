@@ -88,6 +88,11 @@
     integer unsigned bht_idx_width;
     integer unsigned ghist_width;
 
+    integer unsigned ltb_enabled;
+    integer unsigned ltb_tag_width;
+    integer unsigned ltb_idx_width;
+    integer unsigned ltb_cnt_width;
+
     // Capacity of the Instruction/Data TLBs
     integer unsigned itlb_els_4k;
     integer unsigned itlb_els_1g;
@@ -213,11 +218,16 @@
       ,boot_pc       : dram_base_addr_gp
       ,boot_in_debug : 0
 
-      ,branch_metadata_fwd_width: 35
+      ,branch_metadata_fwd_width: 95
       ,btb_tag_width            : 9
       ,btb_idx_width            : 6
       ,bht_idx_width            : 9
       ,ghist_width              : 2
+
+      ,ltb_enabled              : 0
+      ,ltb_tag_width            : 9
+      ,ltb_idx_width            : 3
+      ,ltb_cnt_width            : 10
 
       ,itlb_els_4k : 8
       ,dtlb_els_4k : 8
@@ -280,6 +290,15 @@
 
   // Default configuration is unicore
   localparam bp_proc_param_s bp_unicore_cfg_p = bp_default_cfg_p;
+
+  localparam bp_proc_param_s bp_unicore_ltb_override_p =
+    '{ltb_enabled : 1
+      ,default    : "inv"
+      };
+  `bp_aviary_derive_cfg(bp_unicore_ltb_cfg_p
+                        ,bp_unicore_ltb_override_p
+                        ,bp_unicore_cfg_p
+                        );
 
   localparam bp_proc_param_s bp_unicore_bootrom_override_p =
     '{boot_pc        : bootrom_base_addr_gp
@@ -781,6 +800,11 @@
       ,`bp_aviary_define_override(bht_idx_width, BP_BHT_IDX_WIDTH, `BP_CUSTOM_BASE_CFG)
       ,`bp_aviary_define_override(ghist_width, BP_GHIST_WIDTH, `BP_CUSTOM_BASE_CFG)
 
+      ,`bp_aviary_define_override(ltb_enabled, BP_LTB_ENABLED, `BP_CUSTOM_BASE_CFG)
+      ,`bp_aviary_define_override(ltb_tag_width, BP_LTB_TAG_WIDTH, `BP_CUSTOM_BASE_CFG)
+      ,`bp_aviary_define_override(ltb_idx_width, BP_LTB_IDX_WIDTH, `BP_CUSTOM_BASE_CFG)
+      ,`bp_aviary_define_override(ltb_cnt_width, BP_LTB_CNT_WIDTH, `BP_CUSTOM_BASE_CFG)
+
       ,`bp_aviary_define_override(itlb_els_4k, BP_ITLB_ELS_4K, `BP_CUSTOM_BASE_CFG)
       ,`bp_aviary_define_override(itlb_els_1g, BP_ITLB_ELS_1G, `BP_CUSTOM_BASE_CFG)
       ,`bp_aviary_define_override(dtlb_els_4k, BP_DTLB_ELS_4K, `BP_CUSTOM_BASE_CFG)
@@ -843,8 +867,10 @@
   /* verilator lint_off WIDTH */
   parameter bp_proc_param_s [max_cfgs-1:0] all_cfgs_gp =
   {
+    bp_unicore_ltb_cfg_p
+
     // Various testing configs
-    bp_multicore_cce_ucode_half_cfg_p
+    ,bp_multicore_cce_ucode_half_cfg_p
     ,bp_multicore_half_cfg_p
     ,bp_unicore_half_cfg_p
 
@@ -907,8 +933,10 @@
   // This enum MUST be kept up to date with the parameter array above
   typedef enum bit [lg_max_cfgs-1:0]
   {
+    e_bp_unicore_ltb_cfg                            = 44
+
     // Various testing config
-    e_bp_multicore_cce_ucode_half_cfg               = 43
+    ,e_bp_multicore_cce_ucode_half_cfg              = 43
     ,e_bp_multicore_half_cfg                        = 42
     ,e_bp_unicore_half_cfg                          = 41
 

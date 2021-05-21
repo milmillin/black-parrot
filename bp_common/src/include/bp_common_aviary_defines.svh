@@ -55,6 +55,11 @@
     , localparam bht_idx_width_p             = proc_param_lp.bht_idx_width                         \
     , localparam ghist_width_p               = proc_param_lp.ghist_width                           \
                                                                                                    \
+    , localparam ltb_enabled_p               = proc_param_lp.ltb_enabled                           \
+    , localparam ltb_tag_width_p             = proc_param_lp.ltb_tag_width                         \
+    , localparam ltb_idx_width_p             = proc_param_lp.ltb_idx_width                         \
+    , localparam ltb_cnt_width_p             = proc_param_lp.ltb_cnt_width                         \
+                                                                                                   \
     , localparam itlb_els_4k_p              = proc_param_lp.itlb_els_4k                            \
     , localparam itlb_els_1g_p              = proc_param_lp.itlb_els_1g                            \
     , localparam dtlb_els_4k_p              = proc_param_lp.dtlb_els_4k                            \
@@ -204,6 +209,11 @@
           ,`bp_aviary_parameter_override(btb_idx_width, override_cfg_mp, default_cfg_mp)           \
           ,`bp_aviary_parameter_override(bht_idx_width, override_cfg_mp, default_cfg_mp)           \
           ,`bp_aviary_parameter_override(ghist_width, override_cfg_mp, default_cfg_mp)             \
+                                                                                                   \
+          ,`bp_aviary_parameter_override(ltb_enabled, override_cfg_mp, default_cfg_mp)           \
+          ,`bp_aviary_parameter_override(ltb_tag_width, override_cfg_mp, default_cfg_mp)           \
+          ,`bp_aviary_parameter_override(ltb_idx_width, override_cfg_mp, default_cfg_mp)           \
+          ,`bp_aviary_parameter_override(ltb_cnt_width, override_cfg_mp, default_cfg_mp)           \
                                                                                                    \
           ,`bp_aviary_parameter_override(itlb_els_4k, override_cfg_mp, default_cfg_mp)             \
           ,`bp_aviary_parameter_override(itlb_els_1g, override_cfg_mp, default_cfg_mp)             \

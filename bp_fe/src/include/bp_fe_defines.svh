@@ -28,7 +28,7 @@
       logic [vaddr_width_mp-1:0] imm;        \
     }  bp_fe_instr_scan_s;
 
-  `define declare_bp_fe_branch_metadata_fwd_s(btb_tag_width_mp, btb_idx_width_mp, bht_idx_width_mp, ghist_width_mp) \
+  `define declare_bp_fe_branch_metadata_fwd_s(btb_tag_width_mp, btb_idx_width_mp, bht_idx_width_mp, ghist_width_mp, vaddr_width_mp, ltb_cnt_width_mp) \
     typedef struct packed                                                                         \
     {                                                                                             \
       logic                           is_br;                                                      \
@@ -43,9 +43,13 @@
       logic [bht_idx_width_mp-1:0]    bht_idx;                                                    \
       logic [1:0]                     bht_val;                                                    \
       logic [ghist_width_mp-1:0]      ghist;                                                      \
+      logic [vaddr_width_mp-1:0]      src_vaddr;                                                  \
+      logic                           src_ltb;                                                    \
+      logic [ltb_cnt_width_mp-1:0]    ltb_non_spec_cnt;                                           \
+      logic [ltb_cnt_width_mp-1:0]    ltb_trip_cnt;                                               \
     }  bp_fe_branch_metadata_fwd_s;
 
-  `define declare_bp_fe_pc_gen_stage_s(vaddr_width_mp, ghist_width_mp) \
+  `define declare_bp_fe_pc_gen_stage_s(vaddr_width_mp, ghist_width_mp, ltb_cnt_width_mp) \
     typedef struct packed               \
     {                                   \
       logic taken;                      \
@@ -54,6 +58,9 @@
       logic btb;                        \
       logic [1:0] bht;                  \
       logic [ghist_width_mp-1:0] ghist; \
+      logic ltb;                        \
+      logic [ltb_cnt_width_mp-1:0] ltb_non_spec_cnt; \
+      logic [ltb_cnt_width_mp-1:0] ltb_trip_cnt; \
     }  bp_fe_pred_s
 
   `define bp_fe_instr_scan_width(vaddr_width_mp) \

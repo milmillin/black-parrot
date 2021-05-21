@@ -23,7 +23,7 @@ VV_OPTS += --threads $(VERILATOR_THREADS)
 VV_OPTS += --top-module $(TOP_MODULE)
 VV_OPTS += -f flist.vcs
 VV_OPTS += config.vlt
-VV_OPTS += --build --exe
+VV_OPTS += --build --exe -j 8
 VV_OPTS += -o simsc
 VV_OPTS += -Wno-timescalemod
 
