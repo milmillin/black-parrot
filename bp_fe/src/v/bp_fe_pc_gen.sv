@@ -117,27 +117,19 @@ module bp_fe_pc_gen
   wire ltb_r_v_li = next_pc_yumi_i & ~ovr_taken & ~ovr_ret;
   wire ltb_r_retry_li = redirect_v_i | redirect_v_r;
 
-  wire ltb_w_v_li =
-     (redirect_br_v_i & ~redirect_br_nonbr_i)
-     | (attaboy_v_i);
-  // wire ltb_w_v_li =
-     // (redirect_br_v_i & ~redirect_br_nonbr_i & (redirect_pc_i < br_metadata_fwd.src_vaddr))
-     // | (attaboy_v_i & (attaboy_pc_i < br_metadata_fwd.src_vaddr));
+  wire ltb_w_v_li = next_pc_yumi_i
+      & ((redirect_br_v_i & ~redirect_br_nonbr_i)
+        | (attaboy_v_i));
   wire ltb_mispredict_li = redirect_br_v_i & ~redirect_br_nonbr_i;
   wire ltb_taken_li =
     (redirect_br_v_i & ~redirect_br_nonbr_i & redirect_br_taken_i)
     | (attaboy_v_i & attaboy_taken_i);
-  wire ltb_conf_li = attaboy_v_i & attaboy_br_metadata_fwd.src_ltb;
   wire [vaddr_width_p-1:0]   ltb_src_addr_li     = br_metadata_fwd.src_vaddr;
-  wire [ltb_cnt_width_p-1:0] ltb_non_spec_cnt_li = br_metadata_fwd.ltb_non_spec_cnt;
-  wire [ltb_cnt_width_p-1:0] ltb_trip_cnt_li     = br_metadata_fwd.ltb_trip_cnt;
 
   wire ltb_init_done_lo;
   wire ltb_v_lo;
   wire ltb_conf_lo;
   wire ltb_taken_lo;
-  wire [ltb_cnt_width_p-1:0] ltb_non_spec_cnt_lo;
-  wire [ltb_cnt_width_p-1:0] ltb_trip_cnt_lo;
   wire ltb_w_yumi_lo;
   
   if (ltb_enabled_p) begin
@@ -154,16 +146,11 @@ module bp_fe_pc_gen
       ,.pred_v_o(ltb_v_lo)
       ,.pred_conf_o(ltb_conf_lo)
       ,.pred_taken_o(ltb_taken_lo)
-      ,.pred_non_spec_cnt_o(ltb_non_spec_cnt_lo)
-      ,.pred_trip_cnt_o(ltb_trip_cnt_lo)
 
       ,.w_v_i(ltb_w_v_li)
       ,.br_mispredict_i(ltb_mispredict_li)
       ,.br_taken_i(ltb_taken_li)
-      ,.br_conf_i(ltb_conf_li)
       ,.br_src_addr_i(ltb_src_addr_li)
-      ,.br_non_spec_cnt_i(ltb_non_spec_cnt_li)
-      ,.br_trip_cnt_i(ltb_trip_cnt_li)
       ,.w_yumi_o(ltb_w_yumi_lo)
       );
   end else begin
@@ -171,8 +158,6 @@ module bp_fe_pc_gen
     assign ltb_v_lo = '0;
     assign ltb_conf_lo = '0;
     assign ltb_taken_lo = '0;
-    assign ltb_non_spec_cnt_lo = '0;
-    assign ltb_trip_cnt_lo = '0;
     assign ltb_w_yumi_lo = '0;
   end
 
@@ -292,8 +277,6 @@ module bp_fe_pc_gen
           pred_if2_n.btb   = btb_br_tgt_v_lo;
           pred_if2_n.bht   = bht_val_lo;
           pred_if2_n.ltb              = ltb_v_lo & ltb_conf_lo;
-          pred_if2_n.ltb_non_spec_cnt = ltb_non_spec_cnt_lo;
-          pred_if2_n.ltb_trip_cnt     = ltb_trip_cnt_lo;
         end
       else
         begin
@@ -342,8 +325,6 @@ module bp_fe_pc_gen
           ,is_ret  : is_ret
           ,src_ltb : pred_if2_r.ltb
           ,src_vaddr : pc_if2_r
-          ,ltb_non_spec_cnt : pred_if2_r.ltb_non_spec_cnt
-          ,ltb_trip_cnt : pred_if2_r.ltb_trip_cnt
           };
 
   // Scan fetched instruction

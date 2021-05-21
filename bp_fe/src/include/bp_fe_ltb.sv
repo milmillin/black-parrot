@@ -20,23 +20,18 @@ module bp_fe_ltb
    , output logic                     init_done_o
 
    // Synchronous read
-   , input                              r_v_i
-   , input [vaddr_width_p-1:0]          r_addr_i
-   , input                              r_retry_i      // won't write
-   , output logic                       pred_v_o
-   , output logic                       pred_conf_o
-   , output logic                       pred_taken_o
-   , output logic [ltb_cnt_width_p-1:0] pred_non_spec_cnt_o
-   , output logic [ltb_cnt_width_p-1:0] pred_trip_cnt_o
+   , input                            r_v_i
+   , input [vaddr_width_p-1:0]        r_addr_i
+   , input                            r_retry_i      // won't write
+   , output logic                     pred_v_o
+   , output logic                     pred_conf_o
+   , output logic                     pred_taken_o
 
    // Synchronous write
    , input                            w_v_i             // branch
    , input                            br_mispredict_i
    , input                            br_taken_i
-   , input                            br_conf_i
    , input [vaddr_width_p-1:0]        br_src_addr_i
-   , input [ltb_cnt_width_p-1:0]      br_non_spec_cnt_i
-   , input [ltb_cnt_width_p-1:0]      br_trip_cnt_i
    , output logic                     w_yumi_o
    );
 
@@ -95,28 +90,34 @@ module bp_fe_ltb
   wire [ltb_idx_width_p-1:0] w_idx_li = br_src_addr_i[2+:ltb_idx_width_p];
   wire [ltb_tag_width_p-1:0] w_tag_li = br_src_addr_i[2+ltb_idx_width_p+:ltb_tag_width_p];
 
+  logic r_tag_match;
+  logic w_tag_match;
+
   wire rw_same_addr = r_v_i & ~r_retry_i & w_v_i & (r_idx_li == w_idx_li);
 
   logic [ltb_els_lp-1:0]      r_idx_one_hot;
   logic [ltb_els_lp-1:0]      w_idx_one_hot;
 
-  bp_ltb_entry_s              tag_mem_data_lo;
-  wire                        tag_mem_r_v_li    = r_v_i;
-  wire [ltb_idx_width_p-1:0]  tag_mem_r_addr_li = r_idx_li;
+  bp_ltb_entry_s              tag_mem_r0_data_lo;
+  wire                        tag_mem_r0_v_li    = r_v_i;
+  wire [ltb_idx_width_p-1:0]  tag_mem_r0_addr_li = r_idx_li;
 
-  logic [ltb_cnt_width_p-1:0] spec_cnt_r[ltb_els_lp-1:0];
+  bp_ltb_entry_s              tag_mem_r1_data_lo;
+  wire                        tag_mem_r1_v_li    = w_v_i & ~rw_same_addr;
+  wire [ltb_idx_width_p-1:0]  tag_mem_r1_addr_li = w_idx_li;
 
   bp_ltb_entry_s              tag_mem_data_li;
-  wire                        tag_mem_w_v_li    = is_clear | (w_v_i & ~rw_same_addr);
+  wire                        tag_mem_w_v_li    = is_clear 
+                                                    | (w_v_i & ~rw_same_addr
+                                                      & ((br_mispredict_i & ~br_taken_i) | w_tag_match));
   wire [btb_idx_width_p-1:0]  tag_mem_w_addr_li = is_clear ? init_cnt : w_idx_li;
 
+  logic [ltb_cnt_width_p-1:0] spec_cnt_r[ltb_els_lp-1:0];
   logic [ltb_cnt_width_p-1:0] non_spec_cnt_plus1;
-  // logic [ltb_cnt_width_p-1:0] w_spec_cnt;
-  // logic [ltb_cnt_width_p-1:0] r_spec_cnt;
+  assign non_spec_cnt_plus1  = tag_mem_r1_data_lo.non_spec_cnt + 1;
 
-  // assign w_spec_cnt          = spec_cnt_lo[w_idx_li];
-  // assign r_spec_cnt          = spec_cnt_lo[r_idx_li];
-  assign non_spec_cnt_plus1  = br_non_spec_cnt_i + 1;
+  assign r_tag_match = (r_tag_li == tag_mem_r0_data_lo.tag);
+  assign w_tag_match = (w_tag_li == tag_mem_r1_data_lo.tag);
 
   bsg_decode #(.num_out_p(ltb_els_lp))
    r_idx_decode
@@ -144,8 +145,8 @@ module bp_fe_ltb
           spec_cnt_n = non_spec_cnt_plus1;
         else if (w_v_i & ~rw_same_addr & ~br_taken_i & w_idx_one_hot[i])
           spec_cnt_n = spec_cnt_r[i] - non_spec_cnt_plus1;
-        else if (r_v_i & ~r_retry_i & r_idx_one_hot[i] & r_tag_li == tag_mem_data_lo.tag) begin
-          if (tag_mem_data_lo.conf & (spec_cnt_r[i] == tag_mem_data_lo.trip_cnt))
+        else if (r_v_i & ~r_retry_i & r_idx_one_hot[i] & r_tag_match) begin
+          if (tag_mem_r0_data_lo.conf & (spec_cnt_r[i] == tag_mem_r0_data_lo.trip_cnt))
             spec_cnt_n = '0;
           else
             spec_cnt_n = spec_cnt_r[i] + 1;
@@ -170,20 +171,25 @@ module bp_fe_ltb
       if (br_taken_i)
         tag_mem_data_li = '{tag: w_tag_li, 
                             non_spec_cnt: non_spec_cnt_plus1,
-                            trip_cnt: br_trip_cnt_i, 
-                            conf: br_conf_i};
+                            trip_cnt: tag_mem_r1_data_lo.trip_cnt, 
+                            conf: tag_mem_r1_data_lo.conf};
       else begin
-        // not taken
-        tag_mem_data_li = '{tag: w_tag_li,
-                            non_spec_cnt: '0,
-                            trip_cnt: br_non_spec_cnt_i,
-                            conf: (br_trip_cnt_i != 0) & (br_non_spec_cnt_i == br_trip_cnt_i)};
+        if (br_mispredict_i & ~w_tag_match)
+          tag_mem_data_li = '{tag: w_tag_li,
+                              non_spec_cnt: '0,
+                              trip_cnt: '0,
+                              conf: '0};
+        else
+          tag_mem_data_li = '{tag: w_tag_li,
+                              non_spec_cnt: '0,
+                              trip_cnt: tag_mem_r1_data_lo.non_spec_cnt,
+                              conf: (tag_mem_r1_data_lo.trip_cnt != 0) & (tag_mem_r1_data_lo.non_spec_cnt == tag_mem_r1_data_lo.trip_cnt)};
       end
     end
   end
 
   // ASYNC MEM
-  bsg_mem_1r1w
+  bsg_mem_2r1w
    #(.width_p($bits(bp_ltb_entry_s)), .els_p(ltb_els_lp))
    tag_mem
     (.w_clk_i(clk_i)
@@ -193,45 +199,46 @@ module bp_fe_ltb
      ,.w_addr_i(tag_mem_w_addr_li)
      ,.w_data_i(tag_mem_data_li)
 
-     ,.r_v_i(tag_mem_r_v_li)
-     ,.r_addr_i(tag_mem_r_addr_li)
-     ,.r_data_o(tag_mem_data_lo)
+     ,.r0_v_i(tag_mem_r0_v_li)
+     ,.r0_addr_i(tag_mem_r0_addr_li)
+     ,.r0_data_o(tag_mem_r0_data_lo)
+
+     ,.r1_v_i(tag_mem_r1_v_li)
+     ,.r1_addr_i(tag_mem_r1_addr_li)
+     ,.r1_data_o(tag_mem_r1_data_lo)
      );
   assign w_yumi_o = is_run & w_v_i & ~rw_same_addr;
 
   // r_v_i reg
   logic                       r_v_r;
-  logic [ltb_tag_width_p-1:0] r_tag_r;
+  logic                       r_tag_match_r;
+  logic                       r_conf_r;
   logic [ltb_idx_width_p-1:0] r_idx_r;
   bsg_dff_reset
-   #(.width_p(1+ltb_tag_width_p+ltb_idx_width_p))
+   #(.width_p(3+ltb_idx_width_p))
    r_v_reg
     (.clk_i(clk_i)
      ,.reset_i(reset_i)
-     ,.data_i({r_v_i, r_tag_li, r_idx_li})
-     ,.data_o({r_v_r, r_tag_r, r_idx_r})
+     ,.data_i({r_v_i, r_tag_match, r_idx_li, tag_mem_r0_data_lo.conf})
+     ,.data_o({r_v_r, r_tag_match_r, r_idx_r, r_conf_r})
     );
 
-  // output reg
-  bp_ltb_entry_s tag_mem_data_r;
-  bsg_dff_reset_en
-   #(.width_p($bits(bp_ltb_entry_s)))
-   pred_reg
-    (.clk_i(clk_i)
-     ,.reset_i(reset_i)
-     ,.en_i(r_v_i)
-     ,.data_i(tag_mem_data_lo)
-     ,.data_o(tag_mem_data_r)
-     );
-  
-  assign pred_v_o            = r_v_r & (tag_mem_data_r.tag == r_tag_r);
-  assign pred_conf_o         = tag_mem_data_r.conf;
+  assign pred_v_o            = r_v_r & r_tag_match_r;
+  assign pred_conf_o         = r_conf_r;
   assign pred_taken_o        = ~(spec_cnt_r[r_idx_r] == 0);
-  assign pred_non_spec_cnt_o = tag_mem_data_r.non_spec_cnt;
-  assign pred_trip_cnt_o     = tag_mem_data_r.trip_cnt;
 
   // debug
   logic [ltb_cnt_width_p-1:0] r_spec_cnt = spec_cnt_r[r_idx_r];
   logic [ltb_cnt_width_p-1:0] w_spec_cnt = spec_cnt_r[w_idx_li];
+
+  bp_ltb_entry_s tag_mem_r0_data_r;
+  bsg_dff_reset
+   #(.width_p($bits(bp_ltb_entry_s)))
+   entry_reg
+    (.clk_i(clk_i)
+     ,.reset_i(reset_i)
+     ,.data_i(tag_mem_r0_data_lo)
+     ,.data_o(tag_mem_r0_data_r)
+    );
 endmodule
 

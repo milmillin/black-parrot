@@ -45,8 +45,6 @@
       logic [ghist_width_mp-1:0]      ghist;                                                      \
       logic [vaddr_width_mp-1:0]      src_vaddr;                                                  \
       logic                           src_ltb;                                                    \
-      logic [ltb_cnt_width_mp-1:0]    ltb_non_spec_cnt;                                           \
-      logic [ltb_cnt_width_mp-1:0]    ltb_trip_cnt;                                               \
     }  bp_fe_branch_metadata_fwd_s;
 
   `define declare_bp_fe_pc_gen_stage_s(vaddr_width_mp, ghist_width_mp, ltb_cnt_width_mp) \
