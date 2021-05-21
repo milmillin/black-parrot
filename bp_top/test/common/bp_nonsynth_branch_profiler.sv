@@ -86,6 +86,8 @@ module bp_nonsynth_branch_profiler
   integer ras_hit_cnt;
   integer bht_hit_cnt;
 
+  integer file_3;
+  string file_name_3;
   integer file_2;
   string file_name_2;
   integer file;
@@ -97,6 +99,8 @@ module bp_nonsynth_branch_profiler
       file      = $fopen(file_name, "w");
       file_name_2 = $sformatf("%s_%x.csv", branch_trace_file_p, mhartid_i);
       file_2      = $fopen(file_name_2, "w");
+      file_name_3 = $sformatf("%s_%x.info", branch_trace_file_p, mhartid_i);
+      file_3      = $fopen(file_name_3, "w");
       if (ltb_enabled_p)
         $fwrite(file_2, "le_instr,le_src,le_dst,le_mispred,le_taken,le_btb,le_ltb\n");
       else
@@ -122,7 +126,7 @@ module bp_nonsynth_branch_profiler
         instr_cnt <= instr_cnt + commit_v_i;
         attaboy_cnt <= attaboy_cnt + attaboy_v;
         redirect_cnt <= redirect_cnt + pc_redirect_v;
-        if (attaboy_v | (pc_redirect_v & br_miss_v & ~br_miss_nonbr)) begin
+        if ((attaboy_v | pc_redirect_v) & branch_metadata.is_br) begin
           $fwrite(file_2, "%d,[%x],[%x],%d,%d,%d,%d\n",
             instr_cnt,
             branch_metadata.src_vaddr,
@@ -144,15 +148,6 @@ module bp_nonsynth_branch_profiler
             ras_hit_cnt <= ras_hit_cnt + branch_metadata.src_ret;
             bht_hit_cnt <= bht_hit_cnt + branch_metadata.is_br;
 
-            // $display("[%x] attaboy\n", fe_cmd.vaddr);
-            /*
-            $fwrite(file, "%x %x attaboy %s %d\n", 
-              fe_cmd.vaddr, 
-              branch_metadata.src_vaddr, 
-              branch_type.name(), 
-              branch_metadata.src_ltb);
-              */
-
             if (branch_histo.exists(fe_cmd.vaddr))
               begin
                 branch_histo[fe_cmd.vaddr] <= branch_histo[fe_cmd.vaddr] + 1;
@@ -171,16 +166,6 @@ module bp_nonsynth_branch_profiler
             jalr_cnt <= jalr_cnt + branch_metadata.is_jalr;
             ret_cnt     <= ret_cnt + branch_metadata.is_ret;
 
-            /*
-            $fwrite(file, "%x %x %s %s %d\n", 
-              fe_cmd.vaddr, 
-              branch_metadata.src_vaddr, 
-              fe_cmd.operands.pc_redirect_operands.misprediction_reason.name(), 
-              branch_type.name(),
-              branch_metadata.src_ltb);
-              */
-            // $display("[%x] redirect\n", fe_cmd.vaddr);
-
             if (branch_histo.exists(fe_cmd.vaddr))
               begin
                 branch_histo[fe_cmd.vaddr] <= branch_histo[fe_cmd.vaddr] + 1;
@@ -198,6 +183,11 @@ module bp_nonsynth_branch_profiler
   int tmp;
   final
     begin
+      $fwrite(file_3, "instr: %d\n", instr_cnt);
+      $fwrite(file_3, "branch: %d\n", br_cnt);
+      $fwrite(file_3, "jal: %d\n", jal_cnt);
+      $fwrite(file_3, "jalr: %d\n", jalr_cnt);
+
       $fwrite(file, "Branch statistics\n");
       $fwrite(file, "# Instructions: %d\n", instr_cnt);
       $fwrite(file, "# Branch: %d\n", br_cnt);

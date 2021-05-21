@@ -43,36 +43,38 @@ module bp_nonsynth_ltb_profiler
    r_reg
    (.clk_i(clk_i)
     ,.reset_i(reset_i)
-    ,.data_i(r_v_i & r_addr_i == 'h80000130)
+    ,.data_i(r_v_i)
     ,.data_o(r_v_r)
    );
 
-  // integer file_r;
+  integer clk_cnt;
+  integer file_r;
   integer file;
-  // string file_name_r;
+  string file_name_r;
   string file_name;
   wire reset_li = reset_i;
   always_ff @(negedge reset_li)
     begin
       file_name   = $sformatf("%s_w.stats", ltb_trace_file_p);
       file        = $fopen(file_name, "w");
-      // file_name_r = $sformatf("%s_r.stats", ltb_trace_file_p);
-      // file_r      = $fopen(file_name_r, "w");
+      file_name_r = $sformatf("%s_r.stats", ltb_trace_file_p);
+      file_r      = $fopen(file_name_r, "w");
     end
 
   always_ff @(negedge clk_i)
     if (reset_i) begin
+      clk_cnt <= 0;
     end
     else begin
+      clk_cnt <= clk_cnt + 1;
       if (r_v_i) begin
-        if (r_addr_i == 'h80000130) begin
-          $fwrite(file, "r %x ",
-            r_addr_i,
-            );
-        end
+        $fwrite(file_r, "%d,r,[%x],",
+          clk_cnt,
+          r_addr_i,
+          );
       end
       if (r_v_r) begin
-        $fwrite(file, "%d %d %d %d %d 0\n",
+        $fwrite(file_r, "%d,%d,%d,%d,%d,0\n",
           pred_taken_o,
           pred_conf_o,
           r_spec_cnt,
@@ -81,17 +83,16 @@ module bp_nonsynth_ltb_profiler
           );
       end
       if (w_v_i & w_yumi_o) begin
-        if (br_src_addr_i == 'h80000130) begin
-          $fwrite(file, "w %x %d %d %d %d %d %d\n",
-            br_src_addr_i,
-            br_taken_i,
-            br_conf_i,
-            w_spec_cnt,
-            br_non_spec_cnt_i,
-            br_trip_cnt_i,
-            br_mispredict_i
-            );
-        end
+        $fwrite(file, "%d,w,[%x],%d,%d,%d,%d,%d,%d\n",
+          clk_cnt,
+          br_src_addr_i,
+          br_taken_i,
+          br_conf_i,
+          w_spec_cnt,
+          br_non_spec_cnt_i,
+          br_trip_cnt_i,
+          br_mispredict_i
+          );
       end
     end 
 
