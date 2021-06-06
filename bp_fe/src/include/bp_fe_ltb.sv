@@ -83,6 +83,7 @@ module bp_fe_ltb
     logic [ltb_cnt_width_p-1:0] non_spec_cnt;
     logic [ltb_cnt_width_p-1:0] trip_cnt;
     logic                       conf;
+    logic                       overflow;
   }  bp_ltb_entry_s;
 
   wire [ltb_idx_width_p-1:0] r_idx_li = r_addr_i[2+:ltb_idx_width_p];
@@ -114,7 +115,8 @@ module bp_fe_ltb
 
   logic [ltb_cnt_width_p-1:0] spec_cnt_r[ltb_els_lp-1:0];
   logic [ltb_cnt_width_p-1:0] non_spec_cnt_plus1;
-  assign non_spec_cnt_plus1  = tag_mem_r1_data_lo.non_spec_cnt + 1;
+  logic                       non_spec_cnt_ovf;
+  assign {non_spec_cnt_ovf, non_spec_cnt_plus1} = tag_mem_r1_data_lo.non_spec_cnt + 1;
 
   assign r_tag_match = (r_tag_li == tag_mem_r0_data_lo.tag);
   assign w_tag_match = (w_tag_li == tag_mem_r1_data_lo.tag);
@@ -131,7 +133,6 @@ module bp_fe_ltb
 
   for (genvar i = 0; i < ltb_els_lp; i++)
     begin : spec_counters
-      // logic reset_spec = pred_v_n & ~pred_taken_n & r_idx_one_hot[i];
       logic mispred_not_taken = w_v_i & ~rw_same_addr & br_mispredict_i &
                                 ~br_taken_i & w_idx_one_hot[i];
       logic mispred_taken     = w_v_i & ~rw_same_addr & br_mispredict_i &
@@ -169,21 +170,35 @@ module bp_fe_ltb
       tag_mem_data_li = '0;
     else begin
       if (br_taken_i)
-        tag_mem_data_li = '{tag: w_tag_li, 
-                            non_spec_cnt: non_spec_cnt_plus1,
-                            trip_cnt: tag_mem_r1_data_lo.trip_cnt, 
-                            conf: tag_mem_r1_data_lo.conf};
+        // Increase non_spec_cnt
+        tag_mem_data_li = '{
+          tag: w_tag_li
+          ,non_spec_cnt: non_spec_cnt_plus1
+          ,trip_cnt: tag_mem_r1_data_lo.trip_cnt
+          ,conf: tag_mem_r1_data_lo.conf
+          ,overflow: tag_mem_r1_data_lo.overflow | non_spec_cnt_ovf
+        };
       else begin
         if (br_mispredict_i & ~w_tag_match)
-          tag_mem_data_li = '{tag: w_tag_li,
-                              non_spec_cnt: '0,
-                              trip_cnt: '0,
-                              conf: '0};
+          // Insert to LTB
+          tag_mem_data_li = '{
+            tag: w_tag_li
+            ,non_spec_cnt: '0
+            ,trip_cnt: '0
+            ,conf: '0
+            ,overflow: '0
+          };
         else
-          tag_mem_data_li = '{tag: w_tag_li,
-                              non_spec_cnt: '0,
-                              trip_cnt: tag_mem_r1_data_lo.non_spec_cnt,
-                              conf: (tag_mem_r1_data_lo.trip_cnt != 0) & (tag_mem_r1_data_lo.non_spec_cnt == tag_mem_r1_data_lo.trip_cnt)};
+          // Reset non_spec_cnt
+          tag_mem_data_li = '{
+            tag: w_tag_li
+            ,non_spec_cnt: '0
+            ,trip_cnt: tag_mem_r1_data_lo.non_spec_cnt
+            ,conf: (tag_mem_r1_data_lo.non_spec_cnt != 0)
+                    & (tag_mem_r1_data_lo.non_spec_cnt == tag_mem_r1_data_lo.trip_cnt)
+                    & ~tag_mem_r1_data_lo.overflow
+            ,overflow: '0
+          };
       end
     end
   end
